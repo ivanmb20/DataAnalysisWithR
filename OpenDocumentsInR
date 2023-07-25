@@ -1,3 +1,41 @@
 Con setwd("") abrimos el archivo en R. Cambiamos las "\" por "/" debido a que R no lee las backlashes "\"
 Con getwd() te manda en donde está ubicado la consola 
 Con dir() te dice que archivo se encuentra en la ubicación  
+
+#Este simbolo sirve oara hacer comentarios en R
+
+#Para leer el archivo que se encuentra en la ubicación dada en setwd, escribimos lo siguiente
+
+read.csv("Maraton_NY.csv",header="TRUE",row.names=1)
+
+#el primer parámetro del comando "read.csv()" indica el nombre del archivo
+#el segundo parámetro del comando indica que el documento (en esta caso la tabla a leer) tiene encabezados
+#el tercer parámetro del comando indica que los nombres o especificadores de la tabla se encuentran en la columna 1, el numero de columna varía de acuerdo a cada tabla
+
+#existen otros parámetros que se le pueden asignar a la función "read.csv" como son los siguientes
+
+#sep="," indica que los separadores entre columnas son comas
+#dec="." indica que el separador de decimales es un punto
+
+maraton <- read.csv("Maraton_NY.csv",header=TRUE,row.names=1)
+
+View(maraton)
+
+#Existen otros comandos que nos ayudan a sacar información de la tabla que estamos tratando
+
+head(maraton,10) #imprime las primeras 10 filas de la tabla,el numero de filas uno lo escoge, si no escribes dicho numero te saca 6 filas por default
+str(maraton) #desglosa el tipo de dato que representa cada variable en la tabla
+dim(maraton) #indica el numero de filas y columnas que tiene tu tabla
+names(maraton) #te da los nombres de las variables en tu tabla
+
+### Manipulación de filas y columnas ###
+#Podemos imprimir de nuestra tabla original subtablas de acuerdo a las filas y columnas que queramos apreciar
+maraton[,c(2,3,5)] #subtabla que muestra todas las filas y las columnas 2,3 y 5
+maraton[c(38:40,42), ] # subtabla que muestra de las filas 38 a 40 y la 42, todas las columnas
+
+subtabla1 <- maraton[c(1:10),c(2,3)] 
+dim(subtabla1)
+
+subtabla2 <- t(subtabla1) #La función t() traspone la tabla que se le dé
+
+
