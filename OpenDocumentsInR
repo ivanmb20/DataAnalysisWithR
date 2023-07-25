@@ -1,0 +1,3 @@
+Con setwd("") abrimos el archivo en R. Cambiamos las "\" por "/" debido a que R no lee las backlashes "\"
+Con getwd() te manda en donde está ubicado la consola 
+Con dir() te dice que archivo se encuentra en la ubicación  
