@@ -38,4 +38,72 @@ dim(subtabla1)
 
 subtabla2 <- t(subtabla1) #La función t() traspone la tabla que se le dé
 
+##### Filtros para accceder a las tablas ####
+
+
+maraton_tabla_1 <- maraton[maraton$age>30, ] #Esta tabla imprime la subtabla con las edades de los atletas que son mayores a 30 años
+View(maraton_tabla_1)
+#Negacion
+maraton_tabla_2 <- maraton[!(maraton$age>30), ] #Esta tabla imprime la subtabla con las edades de los atletas que son menores 30 años
+View(maraton_tabla_2)
+#Conjunción
+maraton_tabla_3 <- maraton[(maraton$home %in% c("MEX","ARG") & maraton$age>30),] #Aqui aplicamos el comando %in% que selecciona la nacionalidad del corredor y aplicamos una conjuncion para que dichos atletas sean mayores a 30 
+View(maraton_tabla_3)
+#Disjunción
+maraton_tabla_4 <- maraton[(maraton$gender=="Male" | maraton$age<30),] #Con que los atletas sean hombres o seam menores a 30 se cumple la condición
+View(maraton_tabla_4)
+
+dim(maraton[(maraton$gender=="Male" | maraton$age<30),])
+
+##### Categorización ######
+#La categorización es la división de la información numérica para formar nuevos grupos de información
+
+#Aqui crea una nueva categoria a la tabla y le llama categoria donde se divide en 3 partes la columna de tiempo
+maraton$categoria <- cut(maraton$time,breaks=3,labels=c("alto","medio","bajo"))
+View(maraton)
+
+#También se puede dividir la columna en intervalos que nosotros creemos
+
+intervalos <- c(min(maraton$time)-1,100,200,300,400,max(maraton$time+1))
+maraton$categoria2 <- cut(maraton$time,breaks=intervalos,labels=c("c1","c2","c3","c4","c5"))
+
+View(maraton)
+#La función summary nos presenta la cantidad de objetos de la tabla que caen en cada intervalo de la nueva categoría
+summary(maraton$categoria2)
+#Ahora con la función which podemos localizar la posicion en la tabla en la que se encuentra un objeto caracterizado ya sea porque sea maximo o minimo de una columa
+
+min(maraton$time) #Me da el valor mínimo de la columna tiempo de maratón
+which.min(maraton$time) #me dice en qué posición está el minimo
+maraton[which.min(maraton$time),] #me entrega los datos de fila en la que se encuentra el minimoy los valores de todas sus columnas
+
+dir()
+###################3 Ahora vamos a leer otra tabla ########################
+contaminacion <- read.csv("contaminacion.csv",header=TRUE)
+View(contaminacion)
+ #Instalamos la nueva librería
+install.packages("mice")
+library(mice)
+
+md.pattern(contaminacion) #Este comando nos permite visualizar la tabla de valores
+
+conta0 <- contaminacion[-33,] #Le quitamos la fila 33 a la tabla porque tiene más NA y no nos interesa
+
+md.pattern(conta0) #Mostramos la tabla que ya no tiene la fila 33
+View(conta0)
+
+is.na(conta0$CN) # Le pedimos que nos de los valores de true o false de acuerdo a si el numero de fila de la columna  CN es NA
+
+conta0
+complete.cases(conta0) #Complete cases nos dice si es verdad o falso que en la fila de la tabla exista al menos un NA
+
+#Algo análogo a esto es la funcion na.omit(conta0)
+
+na.omit(conta0)
+
+md.pattern(na.omit(conta0))
+
+
+
+
+
 
