@@ -99,10 +99,21 @@ complete.cases(conta0) #Complete cases nos dice si es verdad o falso que en la f
 #Algo análogo a esto es la funcion na.omit(conta0)
 
 na.omit(conta0)
-
 md.pattern(na.omit(conta0))
 
+######### Ahora vamos con el tratamiento de los NA ###################
 
+mean(conta0$Numero_de_empresas) # En este caso la columna Numero_de_empresas no tiene NA por eso es facil calcular su promedio
+#Veamos una fila que tiene #NA
+
+mean(conta0$CN)
+
+#Nos arroja NA y esto es debido a la aritmetica del NA
+#NA+numero=NA // NA*numero=NA // NA/numero=NA
+
+#Para que la operacion no considere los NA es necesario aplicar la función na.rm=TRUE
+
+mean(conta0$CN,na.rm=TRUE)
 
 
 
