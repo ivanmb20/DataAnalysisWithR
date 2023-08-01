@@ -115,6 +115,39 @@ mean(conta0$CN)
 
 mean(conta0$CN,na.rm=TRUE)
 
+#Ahora, si queremos que en donde haya NA se ponga el valor promedio de la columna ocupamos la siguiente función
+#Construimos una nueva columna llamada CN_medias
+conta0$CN_medias <- ifelse(is.na(conta0$CN),mean(conta0$CN,na.rm=TRUE),conta0$CN)
+#Es decir, "ifelse" dice que en donde haya valores NA (is.na(conta0$CN)) coloque el promedio de la columna quitando los NA (mean(conta0$CN,na.rm=TRUE)) 
+# y en dado caso de que no haya NA pone el valor que de por si va ahí (conta0$CN)
+conta0
+
+#Ahora, ¿qué pasa si no estamos trabajando con números?
+#Creamos una tabla nueva llamada B
+B <- data.frame(V1 = c("a","b","c","d","e"),V2 = c("practica","hola","hola",NA,"adios"))
+B
+
+#Instalamos el paquete que trae la moda
+install.packages("modeest")
+library(modeest)
+#Volvemos a utilizar la función ifelse pero ahora aplicando mfv
+B$V2_modas <- ifelse(is.na(B$V2),mfv(B$V2,na_rm=TRUE),B$V2)
+#Es decir, "ifelse" dice que en donde haya valores NA (is.na(B$V2)) coloque la moda de la columna quitando los NA (mfv(B$V2,na_rm=TRUE)) 
+# y en dado caso de que no haya NA pone el valor que de por si va ahí (B$V2N)
+B
+
+summary(factor(B$V2))
+summary(factor(c("a","b","c")))
+
+#Ahora veamos otro método para eliminar los NA
+#Instalamos otra librería 
+#Otro método de reemplazo es el Método de los k-vecinos. Con este método, se imputa los valores de los atributos que faltan en base al vecino K más cercano. 
+#Los vecinos se determinan en base a la medida de la distancia. Una vez que se determinan los K vecinos, los valores faltantes son imputados tomando la media/mediana o moda de los valores conocidos del atributo.
+
+install.packages("DMwR")
+library(DMwR)
 
 
+conta0
+conta1 <- knnImputation(conta0)
 
