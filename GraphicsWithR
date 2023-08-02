@@ -1,1 +1,79 @@
+#Para este módulo vamos a trabajar con la tabla de covid que descargamos de la pagina de gobierno federal
+#Descargamos esa y el diccionario
+setwd("C:/Users/IVAN MARTINEZ BRAVO/Desktop/RESPALDO IVAN 1 08 22/ESCRITORIOO/SciData Courses/CDD_R/covid19")
+dir()
+install.packages("tidyverse")
+library(tidyverse)
+covid <- read.csv("COVID19MEXICO.csv")
+
+dim(covid)
+names(covid)
+
+1007469/40
+#Este numero m es importante porque lo que quiero es dividir mi tabla original en subtablas
+m<- 25187
+
+#Ahora vamos a crear un página para subdividir mi tabla original
+
+partido <- function(x,y){
+  covid[c(x:y),]  
+}
+ 
+partido(1,5)
+View(partido(1,5))
+
+#Ahora vamos a crear las secuencias que van a crear las subtablas
+#Estos van a ser las secuencias en que van a ir las subtablas, aún faltan más
+#1,25187
+#25188,50374
+#50375,75561
+
+#Creamos la secuencia con el comando "seq"
+inicio <- seq(1,1007469,25187)
+final <- seq(25187,1007469,25187)
+#Agregamos la ultima secuencia a final
+final <- c(final,1007469)
+final
+View(final)
+
+#Creamos un data frame que me diga el inicio y el final de las secuencias
+
+cortes <- data.frame(inicio,final)
+View(cortes)
+
+#Si queremos ahora calcular cualquier subtabla utilizamos la funcin partido
+
+partido(cortes[3,1],cortes[3,1])
+View(partido(cortes[3,1],cortes[3,2]))
+
+write.csv(partido(cortes[3,1],cortes[3,2]),"tabla_prueba.csv")
+
+#Veamos la función paste
+paste0("HOla","Mundo")
+paste("Hola","Mundo",sep=" ")
+ #Vamos a aplicar esta función al crear todas las subtablas
+
+for(i in 1:40)
+{
+  write.csv(partido(cortes[i,1],cortes[i,2]), paste0("Tabla",i,".csv"))
+}
+
+#Otra forma de hacerlo
+escritura <- function(i){
+  write.csv(partido(cortes[i,1],cortes[i,2]), paste0("Tabla",i,".csv"))
+}
+
+escritura(3)
+
+for(i in 1:40)
+{
+  escritura(i)
+}
+
+indices <- c(1:40)
+lapply(indices,escritura)
+
+help(lapply)
+
+#donde aqui l apply es el arreglo que nos arroja la funcion escritura aplicada a los indices
 
