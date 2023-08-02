@@ -151,3 +151,87 @@ library(DMwR)
 conta0
 conta1 <- knnImputation(conta0)
 
+#############
+#Mandamos a llamar a la lista #rivers la cual es una lista de los rios mas grandes de estados unidos
+rivers
+help(rivers)
+#Mostramos el gráfico de caja en forma horizontal
+boxplot(rivers,horizontal=TRUE)
+#Hallamos los valores relevantes como media, primer cuartil, segundo cuartil, etc, por medio de la función stats
+
+boxplot.stats(rivers)$out
+
+View(rivers)
+
+rivers[rivers %in% as.vector(boxplot.stats(rivers)$out)]
+
+rivers_data <- data.frame(rivers)
+
+rivers_data[rivers_data[,1] %in% as.vector(boxplot.stats(rivers_data[,1])$out),]
+
+#boxplot nos arroja una gráfica de caja
+help(boxplot)
+boxplot(rivers,horizontal=TRUE)
+boxplot.stats(rivers)
+#Aqui pido que solo me arroje la lista de out que está en stats
+boxplot.stats(rivers)$out
+
+#Para trabajar más facilmente con la tabla rivers la transformamos a data.frame
+rivers_data <- data.frame(rivers)
+
+#Ahora hallamos el valor minimo de los valores atípicos de la grafica boxplot
+minimo1 <- min(boxplot.stats(rivers)$out)
+
+#Ahora creamos la tabla que me quita los valores atípicos a través de la condición
+rivers1 <- rivers[rivers<minimo1]
+View(rivers1)
+boxplot(rivers1,horizontal=TRUE)
+
+#En la grafica aparecen 3 nuevos atípicos porque al quitar los atipicos originales se vuelven
+#a calcular nuevas stats y se generan nuevos atípicos
+
+#Volvemos a hacer este procedimiento hasta que se quiten los atípicos
+minimo2 <- min(boxplot.stats(rivers1)$out)
+rivers2 <- rivers1[rivers1<minimo2]
+boxplot(rivers2,horizontal=TRUE)
+
+#Aún hay un atípico, entonces repetimos el procedimiento
+minimo3 <- min(boxplot.stats(rivers2)$out)
+rivers3 <- rivers2[rivers2<minimo3]
+boxplot(rivers3,horizontal=TRUE)
+
+#Ahora si ya no hay atípicos, sin embargo, esta práctica no es tan factible al analizar datos
+#Para hacerlo correctamente, tomamos el maximo y vamos eliminando los atípicos  de 1 en 1
+rivers_1 <- rivers[rivers<max(boxplot.stats(rivers)$out)]
+boxplot(rivers_1,horizontal=TRUE)
+
+rivers_2 <- rivers_1[rivers_1<max(boxplot.stats(rivers_1)$out)]
+boxplot(rivers_2,horizontal=TRUE)
+
+
+boxplot(maraton)
+boxplot(maraton[,c(3,5)])
+
+
+install.packages("scales")
+library(scales)
+
+View(rescale(maraton$age))
+
+### El reescalamiento de valores consiste en tomar cada valor x y aplicar la 
+### fórmula (x-x_min)/(x_max-x_min)
+
+min(maraton$age)
+max(maraton$age)
+
+(maraton$age-min(maraton$age))/(max(maraton$age)-min(maraton$age))
+
+### La normalización de valores consiste en tomar cada valor x y aplicar la
+### fórmula (x-media)/desv
+
+reescalado <- sapply(maraton[,c(3,5)],rescale)
+
+View(reescalado)
+
+boxplot(reescalado)
+
