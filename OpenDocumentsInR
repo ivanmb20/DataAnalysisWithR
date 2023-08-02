@@ -235,3 +235,48 @@ View(reescalado)
 
 boxplot(reescalado)
 
+#lapply returns a list of the same length as X, each element of which is the result
+#of applying FUN to the corresponding element of X.
+
+#sapply is a user-friendly version and wrapper of lapply by default returning a vector,
+#matrix or, if simplify = "array", an array if appropriate, by applying simplify2array().
+#sapply(x, f, simplify = FALSE, USE.NAMES = FALSE) is the same as lapply(x, f).
+#
+
+lista_graficas <- lapply(maraton[,c(3,5)],graficador)
+
+lista_graficas[[2]]
+
+###### Ordenamiento #############
+#La función sort ordena una lista de menor a mayor
+sort(maraton$place)
+#La función order pone los índices de los numeros de la tabla de menor a mayor
+order(maraton$place)
+View(maraton)
+
+maraton[order(maraton$place),]
+View(maraton[order(maraton$time),])
+
+#Pidamos ver quienes son los 3 peruanos más rápido de la tabla
+#Creamos la subtabla que contiene a todos los peruanos
+summary(maraton$home)
+peruanos <- maraton[maraton$home=="PER",]
+
+View(peruanos)
+#Ordenamos la columna lugar de la tabla peruanos
+peruanos[order(peruanos$place),]
+#Elegimos los primeros 3
+peruanos[order(peruanos$place),][1:3,]
+
+#Ahora veamos el orden descendente en la ordenación de los datos
+
+A <- data.frame(V1=c("a","b","a","c"),V2=c(5,3,2,1))
+
+#orden ascendente
+A[order(A$V1,A$V2),]
+#orden descendente
+A[order(A$V1,-A$V2),]
+#otra forma de poner en orden descendente columnas que no son numéricas es la siguiente
+A[order(A$V1,A$V2,decreasing = c("TRUE","FALSE")),]
+#La funcion tapply lo que hace es reunir los atributos de una columna a través de una funcion, en este caso, la suma
+tapply(A$V2,A$V1,mean) 
