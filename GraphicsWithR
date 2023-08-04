@@ -77,3 +77,34 @@ help(lapply)
 
 #donde aqui l apply es el arreglo que nos arroja la funcion escritura aplicada a los indices
 
+##################### Ahora vamos a leer las tablas #############################
+
+setwd("C:/Users/IVAN MARTINEZ BRAVO/Desktop/RESPALDO IVAN 1 08 22/ESCRITORIOO/SciData Courses/CDD_R/covid19/tablas")
+dir()
+#Creamos una lista que va a contener a las tablas que creamos
+Tablas <- list() #Lista vacia
+# Vamos a ir llenando esa tabla con un ciclo for
+for(i in 1:40)
+{
+  Tablas[[i]] <- read.csv(dir()[i])
+}
+View(Tablas[[1]])
+
+Lista <-list(1,Tablas,c("Hola","Mundo"))
+Lista[[3]]
+
+#Ahora pegamos todas nuestras listas llamando a la funcion do.call
+#A la función do.call le indicamos que aplique rbind a Tablas
+#Lo que va a hacer rbind es unir las 40 tablas verticalmente,
+#eso solo se cumple si todas las tablas tienen el mismo numero de columnas 
+covid_nueva <-do.call(rbind,Tablas) 
+
+#Preguntamos la dimension de covid_nueva
+dim(covid_nueva)
+
+#Le quitamos la primera columna que se generó (X)
+covid_nueva <- covid_nueva[,-1]
+dim(covid_nueva)
+
+#donde aqui l apply es el arreglo que nos arroja la funcion escritura aplicada a los indices
+
