@@ -106,5 +106,129 @@ dim(covid_nueva)
 covid_nueva <- covid_nueva[,-1]
 dim(covid_nueva)
 
-#donde aqui l apply es el arreglo que nos arroja la funcion escritura aplicada a los indices
+
+############# Graficacion #################
+install.packages("qcc")
+library(qcc)
+#Preguntamos que es la columna clasificación final del data frame de covid
+class(covid_nueva$CLASIFICACION_FINAL) 
+#En el catalogo de clasificación final vemos que del numero 1-3 son casos de covid confirmados
+#El filtro que nos indica los enfermos en la tabla va a ser el siguiente
+
+enfermos <-covid_nueva[covid_nueva$CLASIFICACION_FINAL %in% c(1:3),]
+
+dim(enfermos)
+#Ahora nos fijamos en la residencia de cada uno de los enfermos enfermos$ENTIDAD_RES
+
+#Creamos una nueva columna que se llama enfermos$FAC y le asociamos el valor 1
+
+enfermos$FAC <- 1
+
+#Ahora aplicamos la función tapply al enfermos$ENTIDAD_RES con la suma como funcion 
+#y sumando cada valor de entidad a enfermos$FAC para que vaya sumando los enfermos 
+#de acuerdo a cada entidad
+
+tapply(enfermos$FAC,enfermos$ENTIDAD_RES,sum)
+
+#con esta función obtenemos el numero de enfermos por entidad
+
+#Creamos una grafica de pareto y le damos la funcion anterior para que grafique
+
+pareto.chart(tapply(enfermos$FAC,enfermos$ENTIDAD_RES,sum),col=rainbow(32))
+
+help(pareto.chart)
+
+###################################################
+
+names(covid)
+
+class(covid$CLASIFICACION_FINAL)
+enfermos <- covid[covid$CLASIFICACION_FINAL %in% c(1:3),]
+
+names(enfermos)
+#Vamos a trabajar con los padecimientos 
+
+class(enfermos$DIABETES)
+#Aqui le pido un resumen de los entubados y al ponerlo como as.factor le estooy pidiendo que me los ponga como clasificadores
+summary(as.factor(enfermos$INTUBADO))
+
+#Ahora ponemos la condicion de que estén o no intubados
+
+condicion_intubados <- enfermos[enfermos$INTUBADO %in% c(1:2),]
+
+dim(condicion_intubados)
+
+#Ahora quiero saber cuantos intubados hay por cada estado de la republica
+condicion_intubados$FAC <- 1 #Creamos la columna de 1's para que se vayan sumando de acuerdo a la entidad
+dim(condicion_intubados$FAC)
+intubados_entidad <- tapply(condicion_intubados$FAC,list(condicion_intubados$ENTIDAD_RES,condicion_intubados$INTUBADO),sum)
+
+
+#Cambiamos el nombre de las columnas
+
+names(intubados_entidad) <-c("Si","No")
+#Al compilar marca un error
+#Preguntamos la clase de resultado que es
+class(intubados_entidad)
+#Es una matriz por lo que mejor convertimos a data frame
+
+intubados_entidad <- as.data.frame(intubados_entidad)
+
+View(intubados_entidad)
+#Graficamos intubados_entidad con plot
+plot(intubados_entidad$Si~intubados_entidad$No,xlab="Intubados",ylab="no intubados",main="Condcion de intubamiento")
+
+###########################################################3
+
+#Graficamos con ggplot
+
+library(ggplot2)
+ggplot(data=intubados_entidad) + geom_point(aes(x=No,y=Si)) + labs(title="Condición de intubamiento",x="No",y="Si")
++ theme_classic() + theme(plot.title = element_text(hjust=0.5))
+
+names(enfermos)
+help(ifelse)
+#Esto quiere decir que estamos creando una columna de fallecidos en funcion de si
+# en el catalogo fecha de defuncion NO MARCA 9999-99-99, porque si no marca este numero
+#en el catalogo muestra la fecha exacta en que el paciente murió 
+#De cumplirse esto le asigna el valor 1 al fallecido y 0 al no fallecido
+enfermos$FALLECIMIENTO <- ifelse(as.character(enfermos$FECHA_DEF) !="9999-99-99",1,0)
+#
+intubados <- enfermos[enfermos$INTUBADO==1,]
+View(intubados)
+#Para ver cuantos de los itubados fallecieron
+muertos_int <- intubados[intubados$FALLECIMIENTO==1,]
+dim(muertos_int)
+
+#Si queremos saber cuantos intubados por sexo hay aplicamos la misma logica que para intubados entidad
+
+intubados_sex <- tapply(intubados$FAC,list(intubados$ENTIDAD_RES,intubados$SEXO,intubados$FALLECIMIENTO==1),sum)
+
+#Convertimos a data frame
+
+intubados_sex <- data.frame(intubados_sex)
+#Ahora creamos los intubados que no han muerto
+
+intubados_sex01 <- tapply(intubados$FAC,list(intubados$ENTIDAD_RES,intubados$SEXO),sum)
+intubados_sex01 <- data.frame(intubados_sex01)
+names(intubados_sex01) <- c("Mujeres","Hombres")
+
+View(intubados_sex01)
+
+enfermos$FAC <-1
+#Creamos la muertes totales por entidad y se la agregamos a la tabla de intubados_Sex01 solo 
+#la segunda columna de la sig tabla porque es en donde se encuentran los fallecidos correspondientes
+#a 1 (la primera columna representa 0 y son los enfermos que no han muerto)
+intubados_sex01$total_fallecimiento <- tapply(enfermos$FAC,list(enfermos$ENTIDAD_RES,enfermos$FALLECIMIENTO)
+                                              ,sum)[,2]
+View(intubados_sex01)
+
+#Ahora graficamos una grafica de puntos
+ggplot(data=intubados_sex01) + geom_point(aes(x=Mujeres,y=Hombres),size=intubados_sex01$total_fallecimiento/30,col=rainbow(32),alpha=0.7) 
++ labs(title="Intubados por sexo",x="Mujeres",y="Hombrees")
++ theme_classic() + theme(plot.title = element_text(hjust=0.5))
+
+#Se ve negro porque el numero de fallecidos es muy grande, para ello vamos a reescalar esa variable
+#dividimos entre 100 a intubados_sex01$total_fallecimiento y ya nos aparece un gráfico de burbujas
+#entre más grande el punto quiere decir que es mayor el numero de muertes
 
