@@ -1,0 +1,152 @@
+setwd("C:/Users/IVAN MARTINEZ BRAVO/Desktop/RESPALDO IVAN 1 08 22/ESCRITORIOO/SciData Courses/CDD_R/envipe_clase")
+dir()
+#Esta libería es para que podamos leer los archivos dbf
+library(foreign)
+library(tidyverse)
+
+#Quiero leer todos los archivos DBF entonces aplico un for o un  apply 
+#Necesito que me lea del 11 al 15
+##### Con for #######
+indices <- c(13:15)
+#Con este método tabla[1]-tablas[10] se encuentra vacia en esas posiciones la lista
+#tablas <- list()
+#for( i in indices){
+#  tablas[[i]] <- read.dbf(dir()[i])
+#}
+#
+########### metodo lapply ###########
+#Definimos la funcion lectura
+lectura<-function(x){
+  read.dbf(dir()[x])
+}
+#Con el metodo lapply no tenemos que declarar la lista y aqui el primer elemento de la lectura será tablas[[11]]
+tablas <- lapply(indices,lectura ) #el primer parámetro es a quíen le aplicamos y el segundo es qué aplicamos
+dim(tablas[[1]])
+
+names(tablas[[1]])
+
+class(tablas[[1]]$BPCOD)
+#Es decir, son clasificaciones
+#Donde vienen los tipos de delito
+summary(tablas[[1]]$BPCOD)
+#Ahora veamos otra clasificacion de la tabla 1
+summary(tablas[[1]]$FAC_DEL) #Factor del delito
+#De nuevo FAC_DEL es un factor, ie una clasificación
+class(tablas[[1]]$FAC_DEL)
+
+tablas[[1]]$BPCOD[1] #El primer renglón de BPCOD representa el delito 02 que es ROBO TOTAL DE VEHICULO
+#ahora vemos fact del del primer renglon
+tablas[[1]]$FAC_DEL[1]
+# Es decir existen 446 facultades de delito del delito 02 correspondiente a robo tot. de vehiculo
+
+#Si ahora quiero cambiar la clase de tablas[[1]]$BPCOD de clasificador a numerico
+#aplico el comando as.numeric(as.character(tablas[[1]]$BPCOD)), primero transformo a caracter
+#y luego a numerico
+
+tablas[[1]]$FAC_DEL <- as.numeric(as.character(tablas[[1]]$FAC_DEL))
+#Ahora le pregunto la clase
+class(tablas[[1]]$FAC_DEL)
+
+summary(tablas[[1]]$BP1_1)
+#Transforma de clasificador a numerico
+#tablas[[1]]$FAC_DEL <- as.numeric(as.character(tablas[[1]]$FAC_DEL))
+#en las columnas de BP1 vienen los meses en los que ocurrió el delito, quitame el 88 y 99 que no corresponden a mess
+#tablas[[1]] <- tablas[[1]][!(tablas[[1]]$BP1_1 %in% c("88","99")),]
+#Agrega el año en cada columna de mes con la función paste y transformalo a factor
+#tablas[[1]]$BP1_1 <- as.factor(paste(tablas[[1]]$BP1_1,2010,sep="/"))
+
+#mapply -> la diferencia es que mapply toma dos argumentos a los que aplica la funcion
+#Esta función le cambia el año a cada tabla, y=año y x=tabla
+preprocesado <- function(x,y){
+  x$FAC_DEL <- as.numeric(as.character(x[,"FAC_DEL"]))
+  x <- x[!(x$BP1_1 %in% c("88","99")),]
+  x$BP1_1 <- as.factor(paste(x$BP1_1,y,sep="/"))
+  x
+}
+#Aqui guardamos los años
+years <- c(2013:2015)
+
+#Ahora si genero las tablas con sus BP1_1 por años
+tmod <- mapply(preprocesado,tablas,years)
+
+##################################
+#Ahora leo los descriptores separados por tabulados
+descriptor_1 <- read_tsv("descriptor_11_12.csv",col_names=TRUE)
+descriptor_2 <- read_tsv("descriptor_13_20.csv",col_names=TRUE)
+
+dim(tmod[[1]])
+View(tmod[[1]])
+View(descriptor_1)
+#Ahora con left_join es unir la descripcion verbal de los descriptores a las tablas para
+#que ya no me aparezca el código
+
+tmod[[1]] <- left_join(tmod[[1]],
+                       descriptor_1,
+                       by=c("BPCOD"="CODIGO"))
+
+tmod[[2]] <- left_join(tmod[[2]],
+                       descriptor_1,
+                       by=c("BPCOD"="CODIGO"))
+
+tmod[[3]] <- left_join(tmod[[3]],
+                       descriptor_2,
+                       by=c("BPCOD"="CODIGO"))
+
+tmod[[1]]$BPCOD[1]
+tmod[[1]]$DESCRIPCION[1]
+
+#Preguntamos los nombres de las columnas
+names(tmod[[1]])
+
+#Ahora si hagamos la serie del tiempo
+
+#Quiero tener una tabla que me diga que tipo de delito y en que mes fue cometido
+#Eso lo hacemos con un tapply
+
+del_2010 <- tapply(tmod[[1]]$FAC_DEL,
+                   list(tmod[[1]]$BP1_1,tmod[[1]]$DESCRIPCION),
+                   function(x){sum(x,na.rm=TRUE)})
+#Al tapply le damos la tabla envipe 2013, la fila serán las fechas y las columnas la descripcion
+#en function(x){sum(x,na.rm=TRUE)}) le indico que me sume todo menos los NA
+
+
+#Ahora si creamos las series de tiempo 
+#La volvemos dataframe
+del_2010 <- data.frame(rownames(del_2010),
+                       del_2010,
+                       total=rowSums(del_2010,na.rm=TRUE))
+#los nombres de las filas de del_2010 serán los mismos, copia la matriz del_2010 
+#y agregame una columna que se llametotal sin considerar los NA
+
+View(del_2010)
+
+#Hacemos la serie de tiempo
+install.packages("xts")
+library(xts)
+
+#me creo una serie de tiempo en la que le quito la primera columna
+#el orden se lo indico como mes y año y que me lo coloque en la rprimera columna
+#con el formato mes primero año despues
+del_2010 <- xts(del_2010[,-1],
+                order.by=as.yearmon(del_2010[,1],format="%m/%Y"))
+
+#creo la paleta de colores de los delitos
+color <- rainbow(ncol(del_2010))
+#ploteo la serie de tiempo
+plot.xts(del_2010[,-15],col=color,
+         legend.loc = "topright",
+         cex=0.5,
+         cex.axis = 0.7,
+         main="Total de delitos por tipo")
+
+#Aqui le digo que a partir de la siguiente linea me cree el pdf de lo que voy a graficar
+#tambien puede ser png o jpg
+pdf("ts_total_2011.pdf")
+#Ahora quiero ver la evolución de tiempo de los delitos en total
+plot.xts(del_2010[,15],col=1,
+         legend.loc = "topright",
+         cex=0.5,
+         cex.axis = 0.7,
+         main="Total de delitos")
+#con dev.off le digo que no me muestre la gráfica
+dev.off()
